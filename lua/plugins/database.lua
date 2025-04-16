@@ -1,3 +1,4 @@
+-- lua/plugins/database.lua
 return {
   {
     "tpope/vim-dadbod",
@@ -6,8 +7,14 @@ return {
       "kristijanhusak/vim-dadbod-completion", -- SQL autocompletion
     },
     cmd = { "DBUI", "DBUIToggle", "DBUIAddConnection", "DBUIFindBuffer" },
-    keys = {
-      { "<leader>db", "<cmd>DBUIToggle<cr>", desc = "Toggle Database UI" },
-    },
+    config = function()
+      -- Register keybindings directly via vim.keymap.set
+      vim.keymap.set(
+        "n",
+        "<leader>St",
+        "<cmd>DBUIToggle<cr>",
+        { desc = "Toggle Database UI", noremap = true, silent = true }
+      )
+    end,
   },
 }

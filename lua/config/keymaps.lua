@@ -37,12 +37,22 @@ map("n", "<leader>fg", ":Telescope live_grep<CR>", opts) -- Live grep
 map("n", "<leader>fb", ":Telescope buffers<CR>", opts) -- List buffers
 map("n", "<leader>fh", ":Telescope help_tags<CR>", opts) -- Help tags
 
--- LSP
-map("n", "gd", "vim.lsp.buf.definition", opts)
-map("n", "gr", "vim.lsp.buf.references", opts)
-map("n", "K", "vim.lsp.buf.hover", opts)
-map("n", "<leader>rn", "vim.lsp.buf.rename", opts)
-map("n", "<leader>ca", "vim.lsp.buf.code_action", opts)
+-- LSP - Fix keybindings to work with lazy loading
+map("n", "gd", function()
+  vim.lsp.buf.definition()
+end, opts)
+map("n", "gr", function()
+  vim.lsp.buf.references()
+end, opts)
+map("n", "K", function()
+  vim.lsp.buf.hover()
+end, opts)
+map("n", "<leader>rn", function()
+  vim.lsp.buf.rename()
+end, opts)
+map("n", "<leader>ca", function()
+  vim.lsp.buf.code_action()
+end, opts)
 
 -- Git
 map("n", "<leader>gs", ":Gitsigns stage_hunk<CR>", opts)
@@ -66,7 +76,16 @@ map("n", "<leader>cn", ":cnext<CR>", opts)
 map("n", "<leader>cp", ":cprevious<CR>", opts)
 map("n", "<leader>cc", ":cclose<CR>", opts)
 
-map("n", "zR", require("ufo").openAllFolds, opts) -- Open all folds
-map("n", "zM", require("ufo").closeAllFolds, opts) -- Close all folds
-map("n", "zr", require("ufo").openFoldsExceptKinds, opts) -- Open folds except small ones
-map("n", "zm", require("ufo").closeFoldsWith, opts) -- Close folds of a certain level
+-- FIX: Use function() wrappers for UFO commands to lazy-load them
+map("n", "zR", function()
+  require("ufo").openAllFolds()
+end, opts) -- Open all folds
+map("n", "zM", function()
+  require("ufo").closeAllFolds()
+end, opts) -- Close all folds
+map("n", "zr", function()
+  require("ufo").openFoldsExceptKinds()
+end, opts) -- Open folds except small ones
+map("n", "zm", function()
+  require("ufo").closeFoldsWith()
+end, opts) -- Close folds of a certain level

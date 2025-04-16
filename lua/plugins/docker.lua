@@ -241,7 +241,13 @@ volumes:
     optional = true,
     opts = {
       defaults = {
-        ["<leader>D"] = { name = "+docker" },
+        -- Use the new format for Docker group
+        { "<leader>D", { name = "+docker", _ = "which_key_ignore" } },
+        { "<leader>Di", { "<cmd>terminal docker images<cr>", "Docker Images" } },
+        { "<leader>Dc", { "<cmd>terminal docker-compose up -d<cr>", "Docker Compose Up" } },
+        { "<leader>Db", { "<cmd>terminal docker build .<cr>", "Docker Build" } },
+        { "<leader>Dr", { "<cmd>terminal docker run<cr>", "Docker Run" } },
+        { "<leader>Dp", { "<cmd>terminal docker ps<cr>", "Docker PS" } },
       },
     },
   },
