@@ -1,25 +1,27 @@
--- ~/.config/nvim/lua/plugins/python.lua
+-- lua/plugins/python.lua
 return {
-  -- Mason for tool installation
+  -- Mason configuration for Python tools
   {
     "williamboman/mason.nvim",
     opts = function(_, opts)
+      opts.ensure_installed = opts.ensure_installed or {}
       vim.list_extend(opts.ensure_installed, {
-        "pyright", -- Fast Python LSP
-        "ruff-lsp", -- Fast Python linter and formatter
-        "black", -- Code formatter
-        "debugpy", -- Python debugger
+        "pyright", -- Python LSP
+        "ruff-lsp", -- Fast Python linter
+        "black", -- Python formatter
         "isort", -- Import sorting
+        "debugpy", -- Python debugger
+        "mypy", -- Static type checker
       })
     end,
   },
 
-  -- LSP Configuration
+  -- Configure LSP servers
   {
     "neovim/nvim-lspconfig",
     opts = {
       servers = {
-        -- Pyright for type checking and intellisense
+        -- Pyright configuration
         pyright = {
           settings = {
             python = {
@@ -30,25 +32,25 @@ return {
                   variableTypes = true,
                   functionReturnTypes = true,
                 },
+                autoImportCompletions = true,
               },
             },
           },
         },
-        -- Ruff for fast linting
+        -- Ruff configuration
         ruff_lsp = {
           init_options = {
             settings = {
-              -- Line length for formatting
               line_length = 88,
-              -- Rules to determine code style
               select = {
-                "E",
-                "F",
-                "I",
-                "W", -- Default recommended rules
+                "E", -- pycodestyle errors
+                "F", -- pyflakes
+                "I", -- isort
+                "W", -- pycodestyle warnings
               },
-              -- Any rules to ignore
               ignore = {},
+              fixable = { "A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W" },
+              unfixable = {},
             },
           },
         },
@@ -56,7 +58,7 @@ return {
     },
   },
 
-  -- Code formatting
+  -- Code formatting configuration
   {
     "stevearc/conform.nvim",
     optional = true,
@@ -64,10 +66,39 @@ return {
       formatters_by_ft = {
         python = { "isort", "black" },
       },
+      formatters = {
+        black = {
+          args = { "--line-length=88", "--preview", "-" },
+        },
+        isort = {
+          args = { "--profile", "black", "--line-length", "88", "-" },
+        },
+      },
     },
   },
 
-  -- Python REPL & test runner
+  -- Linting setup
+  {
+    "mfussenegger/nvim-lint",
+    optional = true,
+    opts = {
+      linters_by_ft = {
+        python = { "mypy" },
+      },
+      linters = {
+        mypy = {
+          args = {
+            "--ignore-missing-imports",
+            "--disallow-untyped-defs",
+            "--disallow-incomplete-defs",
+            "--check-untyped-defs",
+          },
+        },
+      },
+    },
+  },
+
+  -- Testing configuration
   {
     "nvim-neotest/neotest",
     dependencies = {
@@ -78,7 +109,7 @@ return {
       adapters = {
         ["neotest-python"] = {
           runner = "pytest",
-          -- Set Python Path to find tests accurately
+          -- Get Python path intelligently
           python = function()
             if vim.fn.filereadable(".venv/bin/python") == 1 then
               return ".venv/bin/python"
@@ -88,10 +119,15 @@ return {
               return vim.fn.exepath("python3") or vim.fn.exepath("python") or "python"
             end
           end,
+          -- Additional pytest arguments
+          args = {
+            "--verbose",
+            "--color=yes",
+          },
         },
       },
     },
-    -- Add test runner bindings
+    -- Testing keymaps
     keys = {
       {
         "<leader>tt",
@@ -108,6 +144,20 @@ return {
         desc = "Run Test File",
       },
       {
+        "<leader>ts",
+        function()
+          require("neotest").summary.toggle()
+        end,
+        desc = "Toggle Test Summary",
+      },
+      {
+        "<leader>to",
+        function()
+          require("neotest").output.open()
+        end,
+        desc = "Open Test Output",
+      },
+      {
         "<leader>td",
         function()
           require("neotest").run.run({ strategy = "dap" })
@@ -117,22 +167,23 @@ return {
     },
   },
 
-  -- Debugger configuration
+  -- Debugging setup
   {
     "mfussenegger/nvim-dap",
     dependencies = {
       "mfussenegger/nvim-dap-python",
       "rcarriga/nvim-dap-ui",
+      "nvim-neotest/nvim-nio", -- Required dependency for dap-ui
     },
     config = function()
       local path = require("mason-registry").get_package("debugpy"):get_install_path()
       require("dap-python").setup(path .. "/venv/bin/python")
 
-      -- Add test methods
+      -- Set pytest as test runner
       require("dap-python").test_runner = "pytest"
 
-      -- Configure virtual environments
-      local get_python_path = function()
+      -- Configure virtual environment detection
+      local function get_python_path()
         if vim.fn.filereadable(".venv/bin/python") == 1 then
           return ".venv/bin/python"
         elseif vim.fn.filereadable("venv/bin/python") == 1 then
@@ -143,7 +194,45 @@ return {
       end
 
       require("dap-python").resolve_python = get_python_path
+
+      -- Initialize DAP UI
+      local dapui = require("dapui")
+      dapui.setup({
+        layouts = {
+          {
+            elements = {
+              { id = "scopes", size = 0.4 },
+              { id = "breakpoints", size = 0.15 },
+              { id = "stacks", size = 0.15 },
+              { id = "watches", size = 0.3 },
+            },
+            size = 0.3,
+            position = "right",
+          },
+          {
+            elements = {
+              { id = "repl", size = 0.5 },
+              { id = "console", size = 0.5 },
+            },
+            size = 0.3,
+            position = "bottom",
+          },
+        },
+      })
+
+      -- Auto-open DAP UI
+      local dap = require("dap")
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["dapui_config"] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited["dapui_config"] = function()
+        dapui.close()
+      end
     end,
+    -- Debugging keymaps
     keys = {
       {
         "<leader>db",
@@ -153,11 +242,18 @@ return {
         desc = "Toggle Breakpoint",
       },
       {
+        "<leader>dB",
+        function()
+          require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
+        end,
+        desc = "Breakpoint Condition",
+      },
+      {
         "<leader>dc",
         function()
           require("dap").continue()
         end,
-        desc = "Start/Continue Debugging",
+        desc = "Continue",
       },
       {
         "<leader>do",
@@ -174,16 +270,46 @@ return {
         desc = "Step Into",
       },
       {
-        "<leader>dq",
+        "<leader>dO",
+        function()
+          require("dap").step_out()
+        end,
+        desc = "Step Out",
+      },
+      {
+        "<leader>dt",
         function()
           require("dap").terminate()
         end,
-        desc = "Terminate Debug Session",
+        desc = "Terminate",
+      },
+      {
+        "<leader>dr",
+        function()
+          require("dap").repl.toggle()
+        end,
+        desc = "Toggle REPL",
+      },
+      {
+        "<leader>dq",
+        function()
+          require("dap").disconnect()
+          require("dapui").close()
+        end,
+        desc = "Disconnect",
+      },
+      {
+        "<leader>dK",
+        function()
+          require("dapui").eval()
+        end,
+        mode = { "n", "v" },
+        desc = "Evaluate Expression",
       },
     },
   },
 
-  -- Virtual environment selector
+  -- Virtual environment manager
   {
     "linux-cultist/venv-selector.nvim",
     dependencies = {
@@ -199,22 +325,48 @@ return {
         ".env",
       },
       auto_refresh = true,
+      search_workspace = true,
+      parents = 3, -- Search 3 levels up for venvs
     },
+    -- Virtual environment keymaps
     keys = {
       { "<leader>cv", "<cmd>VenvSelect<cr>", desc = "Select Virtual Environment" },
-      { "<leader>cd", "<cmd>VenvSelectCached<cr>", desc = "Select Last Environment" },
+      { "<leader>cd", "<cmd>VenvSelectCached<cr>", desc = "Select Last Virtual Environment" },
     },
   },
+
+  -- Additional Python-specific keymaps
   {
     "nvim-telescope/telescope.nvim",
+    optional = true,
     keys = {
       {
         "<leader>rp",
         function()
           vim.cmd("terminal python3 " .. vim.fn.expand("%"))
         end,
-        desc = "Run current Python file",
+        desc = "Run Python File",
+      },
+      {
+        "<leader>pi",
+        function()
+          vim.cmd("terminal pip install -r requirements.txt")
+        end,
+        desc = "Install Requirements",
       },
     },
+  },
+
+  -- Python-specific snippets
+  {
+    "L3MON4D3/LuaSnip",
+    optional = true,
+    config = function(_, opts)
+      require("luasnip").add_snippets("python", {
+        -- Add your custom Python snippets here
+        -- Example:
+        -- s("def", fmt("def {}({}):\n\t{}", { i(1, "name"), i(2), i(3, "pass") })),
+      })
+    end,
   },
 }
