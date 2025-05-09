@@ -33,7 +33,15 @@ map("n", "<leader>tp", ":tabprevious<CR>", opts) -- Previous tab
 
 -- Telescope
 map("n", "<leader>ff", ":Telescope find_files<CR>", opts) -- Find files
-map("n", "<leader>fg", ":Telescope live_grep<CR>", opts) -- Live grep
+map("n", "<leader>fg", function()
+  -- Ensure telescope is loaded
+  local telescope_ok, telescope = pcall(require, "telescope.builtin")
+  if telescope_ok then
+    telescope.live_grep()
+  else
+    vim.notify("Telescope not available", vim.log.levels.ERROR)
+  end
+end, opts)
 map("n", "<leader>fb", ":Telescope buffers<CR>", opts) -- List buffers
 map("n", "<leader>fh", ":Telescope help_tags<CR>", opts) -- Help tags
 
