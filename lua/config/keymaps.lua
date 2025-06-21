@@ -42,7 +42,9 @@ map("n", "<leader>fg", function()
     vim.notify("Telescope not available", vim.log.levels.ERROR)
   end
 end, opts)
-map("n", "<leader>fb", ":Telescope buffers<CR>", opts) -- List buffers
+map("n", "<leader>fb", function()
+  require("telescope.builtin").buffers()
+end, opts) -- List buffers
 map("n", "<leader>fh", ":Telescope help_tags<CR>", opts) -- Help tags
 
 -- LSP - Fix keybindings to work with lazy loading

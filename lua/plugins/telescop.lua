@@ -4,6 +4,7 @@ return {
     "nvim-telescope/telescope.nvim",
     dependencies = {
       -- FZF native for better sorting performance
+      { "nvim-telescope/telescope-project.nvim" },
       {
         "nvim-telescope/telescope-fzf-native.nvim",
         build = "make",
@@ -266,7 +267,7 @@ return {
       telescope.load_extension("fzf")
       telescope.load_extension("file_browser")
       telescope.load_extension("frecency")
-      telescope.load_extension("projects")
+      telescope.load_extension("project")
       telescope.load_extension("media_files")
       telescope.load_extension("ui-select")
       telescope.load_extension("live_grep_args")
