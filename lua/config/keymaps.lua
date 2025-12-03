@@ -1,101 +1,61 @@
-local map = vim.keymap.set
-local opts = { noremap = true, silent = true }
+-- Keymaps Configuration
+local keymap = vim.keymap
 
--- Basic Keymaps
-map("i", "jk", "<Esc>", opts) -- Escape insert mode
-map("n", "<leader>w", ":w<CR>", opts) -- Save file
-map("n", "<leader>q", ":q<CR>", opts) -- Quit
-map("n", "<leader>x", ":x<CR>", opts) -- Save & quit
-map("n", "<leader>h", ":nohlsearch<CR>", opts) -- Clear search highlight
+-- General keymaps
+keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode" })
+keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 
--- Navigation
-map("n", "<C-d>", "<C-d>zz", opts) -- Scroll down half page, center
-map("n", "<C-u>", "<C-u>zz", opts) -- Scroll up half page, center
-map("n", "n", "nzzzv", opts) -- Keep search results centered
-map("n", "N", "Nzzzv", opts)
+-- Window management
+keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" })
+keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
+keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" })
+keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" })
 
--- Window Management
-map("n", "<leader>sv", ":vsplit<CR>", opts) -- Split window vertically
-map("n", "<leader>sh", ":split<CR>", opts) -- Split window horizontally
-map("n", "<leader>se", "<C-w>=", opts) -- Equalize window sizes
-map("n", "<leader>sx", ":close<CR>", opts) -- Close window
+-- Window navigation
+keymap.set("n", "<C-h>", "<C-w>h", { desc = "Navigate to left window" })
+keymap.set("n", "<C-j>", "<C-w>j", { desc = "Navigate to bottom window" })
+keymap.set("n", "<C-k>", "<C-w>k", { desc = "Navigate to top window" })
+keymap.set("n", "<C-l>", "<C-w>l", { desc = "Navigate to right window" })
 
--- Buffer Navigation
-map("n", "<leader>bn", ":bnext<CR>", opts) -- Next buffer
-map("n", "<leader>bp", ":bprevious<CR>", opts) -- Previous buffer
-map("n", "<leader>bd", ":bd<CR>", opts) -- Delete buffer
+-- Resize windows
+keymap.set("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase window height" })
+keymap.set("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease window height" })
+keymap.set("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width" })
+keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase window width" })
 
--- Tabs
-map("n", "<leader>to", ":tabnew<CR>", opts) -- Open new tab
-map("n", "<leader>tx", ":tabclose<CR>", opts) -- Close tab
-map("n", "<leader>tn", ":tabnext<CR>", opts) -- Next tab
-map("n", "<leader>tp", ":tabprevious<CR>", opts) -- Previous tab
+-- Tab management
+keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" })
+keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" })
+keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" })
+keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" })
+keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" })
 
--- Telescope
-map("n", "<leader>ff", ":Telescope find_files<CR>", opts) -- Find files
-map("n", "<leader>fg", function()
-  -- Ensure telescope is loaded
-  local telescope_ok, telescope = pcall(require, "telescope.builtin")
-  if telescope_ok then
-    telescope.live_grep()
-  else
-    vim.notify("Telescope not available", vim.log.levels.ERROR)
-  end
-end, opts)
-map("n", "<leader>fb", function()
-  require("telescope.builtin").buffers()
-end, opts) -- List buffers
-map("n", "<leader>fh", ":Telescope help_tags<CR>", opts) -- Help tags
+-- Buffer management
+keymap.set("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete buffer" })
+keymap.set("n", "<Tab>", "<cmd>bnext<CR>", { desc = "Next buffer" })
+keymap.set("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "Previous buffer" })
 
--- LSP - Fix keybindings to work with lazy loading
-map("n", "gd", function()
-  vim.lsp.buf.definition()
-end, opts)
-map("n", "gr", function()
-  vim.lsp.buf.references()
-end, opts)
-map("n", "K", function()
-  vim.lsp.buf.hover()
-end, opts)
-map("n", "<leader>rn", function()
-  vim.lsp.buf.rename()
-end, opts)
-map("n", "<leader>ca", function()
-  vim.lsp.buf.code_action()
-end, opts)
+-- Move lines
+keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move line down" })
+keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move line up" })
 
--- Git
-map("n", "<leader>gs", ":Gitsigns stage_hunk<CR>", opts)
-map("n", "<leader>gu", ":Gitsigns undo_stage_hunk<CR>", opts)
-map("n", "<leader>gp", ":Gitsigns preview_hunk<CR>", opts)
-map("n", "<leader>gb", ":Telescope git_branches<CR>", opts)
+-- Keep cursor centered
+keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down and center" })
+keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up and center" })
+keymap.set("n", "n", "nzzzv", { desc = "Next search result and center" })
+keymap.set("n", "N", "Nzzzv", { desc = "Previous search result and center" })
 
--- Terminal
-map("n", "<leader>tt", ":ToggleTerm<CR>", opts) -- Open terminal
-map("t", "<Esc>", "<C-\\><C-n>", opts) -- Exit terminal mode
+-- Better paste
+keymap.set("v", "p", '"_dP', { desc = "Paste without yanking" })
 
--- Formatting
-map("n", "<leader>fm", ":lua vim.lsp.buf.format()<CR>", opts)
+-- Save and quit
+keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
+keymap.set("n", "<leader>q", "<cmd>q<CR>", { desc = "Quit" })
+keymap.set("n", "<leader>Q", "<cmd>qa!<CR>", { desc = "Quit all without saving" })
 
--- Commenting
-map("n", "<leader>/", ":lua require('Comment.api').toggle.linewise.current()<CR>", opts)
-map("v", "<leader>/", ":lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>", opts)
+-- Increment/decrement numbers
+keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" })
+keymap.set("n", "<leader>-", "<C-x>", { desc = "Decrement number" })
 
--- Quickfix List
-map("n", "<leader>cn", ":cnext<CR>", opts)
-map("n", "<leader>cp", ":cprevious<CR>", opts)
-map("n", "<leader>cc", ":cclose<CR>", opts)
-
--- FIX: Use function() wrappers for UFO commands to lazy-load them
-map("n", "zR", function()
-  require("ufo").openAllFolds()
-end, opts) -- Open all folds
-map("n", "zM", function()
-  require("ufo").closeAllFolds()
-end, opts) -- Close all folds
-map("n", "zr", function()
-  require("ufo").openFoldsExceptKinds()
-end, opts) -- Open folds except small ones
-map("n", "zm", function()
-  require("ufo").closeFoldsWith()
-end, opts) -- Close folds of a certain level
+-- Select all
+keymap.set("n", "<C-a>", "gg<S-v>G", { desc = "Select all" })
