@@ -4,7 +4,6 @@ return {
   {
     "neovim/nvim-lspconfig",
     opts = function(_, opts)
-      local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
       -- Get the on_attach function from the main lsp config
@@ -23,12 +22,52 @@ return {
         vim.keymap.set("n", "]d", vim.diagnostic.goto_next, keymap_opts)
         vim.keymap.set("n", "K", vim.lsp.buf.hover, keymap_opts)
         vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", keymap_opts)
+
+        -- Enable inlay hints if supported
+        if client.server_capabilities.inlayHintProvider then
+          vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+        end
       end
 
-      -- TypeScript LSP
-      lspconfig.ts_ls.setup({
+      -- TypeScript-specific on_attach with extra keymaps
+      local ts_on_attach = function(client, bufnr)
+        on_attach(client, bufnr)
+        local keymap_opts = { buffer = bufnr, silent = true }
+
+        -- TypeScript specific keymaps
+        vim.keymap.set("n", "<leader>co", function()
+          vim.lsp.buf.code_action({
+            apply = true,
+            context = { only = { "source.organizeImports" }, diagnostics = {} },
+          })
+        end, vim.tbl_extend("force", keymap_opts, { desc = "Organize imports" }))
+
+        vim.keymap.set("n", "<leader>cM", function()
+          vim.lsp.buf.code_action({
+            apply = true,
+            context = { only = { "source.addMissingImports.ts" }, diagnostics = {} },
+          })
+        end, vim.tbl_extend("force", keymap_opts, { desc = "Add missing imports" }))
+
+        vim.keymap.set("n", "<leader>cu", function()
+          vim.lsp.buf.code_action({
+            apply = true,
+            context = { only = { "source.removeUnused.ts" }, diagnostics = {} },
+          })
+        end, vim.tbl_extend("force", keymap_opts, { desc = "Remove unused imports" }))
+
+        vim.keymap.set("n", "<leader>ci", function()
+          vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
+        end, vim.tbl_extend("force", keymap_opts, { desc = "Toggle inlay hints" }))
+      end
+
+      -- TypeScript LSP (new v3.0.0 API)
+      vim.lsp.config.ts_ls = {
+        cmd = { "typescript-language-server", "--stdio" },
+        filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
+        root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
         capabilities = capabilities,
-        on_attach = on_attach,
+        on_attach = ts_on_attach,
         settings = {
           typescript = {
             inlayHints = {
@@ -53,10 +92,13 @@ return {
             },
           },
         },
-      })
+      }
 
-      -- ESLint LSP
-      lspconfig.eslint.setup({
+      -- ESLint LSP (new v3.0.0 API)
+      vim.lsp.config.eslint = {
+        cmd = { "vscode-eslint-language-server", "--stdio" },
+        filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx", "vue", "svelte", "astro" },
+        root_markers = { ".eslintrc", ".eslintrc.js", ".eslintrc.cjs", ".eslintrc.yaml", ".eslintrc.yml", ".eslintrc.json", "eslint.config.js", "eslint.config.mjs", "eslint.config.cjs" },
         capabilities = capabilities,
         on_attach = function(client, bufnr)
           on_attach(client, bufnr)
@@ -66,7 +108,10 @@ return {
             command = "EslintFixAll",
           })
         end,
-      })
+      }
+
+      -- Enable TypeScript LSP servers
+      vim.lsp.enable({ "ts_ls", "eslint" })
     end,
   },
 

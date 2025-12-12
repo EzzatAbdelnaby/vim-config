@@ -24,11 +24,11 @@ keymap.set("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease window
 keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase window width" })
 
 -- Tab management
-keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" })
-keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" })
-keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" })
-keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" })
-keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" })
+keymap.set("n", "<leader>To", "<cmd>tabnew<CR>", { desc = "Open new tab" })
+keymap.set("n", "<leader>Tx", "<cmd>tabclose<CR>", { desc = "Close current tab" })
+keymap.set("n", "<leader>Tn", "<cmd>tabn<CR>", { desc = "Go to next tab" })
+keymap.set("n", "<leader>Tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" })
+keymap.set("n", "<leader>Tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" })
 
 -- Buffer management
 keymap.set("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete buffer" })
@@ -59,3 +59,50 @@ keymap.set("n", "<leader>-", "<C-x>", { desc = "Decrement number" })
 
 -- Select all
 keymap.set("n", "<C-a>", "gg<S-v>G", { desc = "Select all" })
+
+-- Toggle transparency
+keymap.set("n", "<leader>cT", function()
+  local bg = vim.api.nvim_get_hl(0, { name = "Normal" }).bg
+  if bg == nil then
+    -- Currently transparent, make it opaque
+    vim.cmd("highlight Normal guibg=#1e1e2e")
+    vim.cmd("highlight NormalFloat guibg=#1e1e2e")
+    print("Transparency: OFF")
+  else
+    -- Currently opaque, make it transparent
+    vim.cmd("highlight Normal guibg=NONE ctermbg=NONE")
+    vim.cmd("highlight NormalFloat guibg=NONE ctermbg=NONE")
+    print("Transparency: ON")
+  end
+end, { desc = "Toggle transparency" })
+
+-- Theme switcher with variants
+keymap.set("n", "<leader>ct", function()
+  local themes = {
+    -- Rose Pine variants
+    "rose-pine-main",
+    "rose-pine-moon",
+    "rose-pine-dawn",
+    -- Catppuccin variants
+    "catppuccin-mocha",
+    "catppuccin-macchiato",
+    "catppuccin-frappe",
+    "catppuccin-latte",
+    -- Tokyo Night variants
+    "tokyonight-night",
+    "tokyonight-storm",
+    "tokyonight-moon",
+    "tokyonight-day",
+    -- Kanagawa variants
+    "kanagawa-wave",
+    "kanagawa-dragon",
+    "kanagawa-lotus",
+    -- Gruvbox
+    "gruvbox",
+  }
+  vim.ui.select(themes, { prompt = "Select theme:" }, function(choice)
+    if choice then
+      vim.cmd("colorscheme " .. choice)
+    end
+  end)
+end, { desc = "Change theme" })

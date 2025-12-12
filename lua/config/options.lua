@@ -66,6 +66,9 @@ opt.fileencoding = "utf-8"
 -- Mouse
 opt.mouse = "a"
 
+-- Blinking cursor
+opt.guicursor = "n-v-c:block-blinkon500-blinkoff500,i-ci-ve:ver25-blinkon500-blinkoff500,r-cr:hor20-blinkon500-blinkoff500"
+
 -- Folding
 opt.foldmethod = "expr"
 opt.foldexpr = "nvim_treesitter#foldexpr()"
@@ -76,3 +79,12 @@ opt.foldlevel = 99
 opt.iskeyword:append("-")
 opt.hidden = true
 opt.showmode = false
+
+-- Highlight yanked text
+vim.api.nvim_create_autocmd("TextYankPost", {
+  desc = "Highlight when yanking text",
+  group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
+  callback = function()
+    vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
+  end,
+})

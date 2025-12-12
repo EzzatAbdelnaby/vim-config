@@ -4,7 +4,6 @@ return {
   {
     "neovim/nvim-lspconfig",
     opts = function(_, opts)
-      local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
       -- Get the on_attach function
@@ -25,8 +24,11 @@ return {
         vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", keymap_opts)
       end
 
-      -- Pyright LSP
-      lspconfig.pyright.setup({
+      -- Pyright LSP (new v3.0.0 API)
+      vim.lsp.config.pyright = {
+        cmd = { "pyright-langserver", "--stdio" },
+        filetypes = { "python" },
+        root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", "pyrightconfig.json", ".git" },
         capabilities = capabilities,
         on_attach = on_attach,
         settings = {
@@ -42,13 +44,19 @@ return {
             },
           },
         },
-      })
+      }
 
-      -- Ruff LSP (fast linter)
-      lspconfig.ruff_lsp.setup({
+      -- Ruff LSP (new v3.0.0 API)
+      vim.lsp.config.ruff = {
+        cmd = { "ruff", "server" },
+        filetypes = { "python" },
+        root_markers = { "pyproject.toml", "ruff.toml", ".ruff.toml", ".git" },
         capabilities = capabilities,
         on_attach = on_attach,
-      })
+      }
+
+      -- Enable Python LSP servers
+      vim.lsp.enable({ "pyright", "ruff" })
     end,
   },
 
