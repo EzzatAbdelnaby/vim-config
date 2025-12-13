@@ -97,12 +97,12 @@ return {
           ["@operator"] = { fg = "#9A8F80" },
 
           -- UI elements
-          CursorLine = { bg = "surface", blend = 50 },
-          ColorColumn = { bg = "surface" },
-          StatusLine = { fg = "#D4C4A9", bg = "surface" },
+          CursorLine = { bg = "none" },
+          ColorColumn = { bg = "none" },
+          StatusLine = { fg = "#D4C4A9", bg = "none" },
           Search = { bg = "#C48B9F", fg = "base" },
           IncSearch = { bg = "#A9B37E", fg = "base" },
-          LineNr = { fg = "#7D7568" },
+          LineNr = { fg = "#928374" },
           CursorLineNr = { fg = "#D4C4A9" },
         },
       })
@@ -155,8 +155,9 @@ return {
         custom_highlights = function(colors)
           return {
             Comment = { fg = colors.overlay0, style = { "italic" } },
-            LineNr = { fg = colors.surface1 },
+            LineNr = { fg = colors.overlay0 },
             CursorLineNr = { fg = colors.lavender },
+            CursorLine = { bg = "none" },
           }
         end,
       })
@@ -183,9 +184,9 @@ return {
         },
         on_highlights = function(hl, c)
           hl.Comment = { fg = c.comment, italic = true }
-          hl.LineNr = { fg = c.dark3 }
+          hl.LineNr = { fg = c.dark5 }
           hl.CursorLineNr = { fg = c.orange }
-          hl.CursorLine = { bg = c.bg_highlight }
+          hl.CursorLine = { bg = "none" }
         end,
       })
     end,
@@ -216,9 +217,12 @@ return {
         },
         overrides = function(colors)
           return {
-            LineNr = { fg = colors.palette.sumiInk4 },
+            LineNr = { fg = "#727169" },
             CursorLineNr = { fg = colors.palette.roninYellow, bold = false },
             Comment = { fg = colors.palette.fujiGray, italic = true },
+            CursorLine = { bg = "none" },
+            CursorLineFold = { bg = "none" },
+            CursorLineSign = { bg = "none" },
           }
         end,
       })
@@ -243,8 +247,9 @@ return {
         },
         overrides = {
           Comment = { italic = true },
-          LineNr = { fg = "#665c54" },
+          LineNr = { fg = "#928374" },
           CursorLineNr = { fg = "#fabd2f", bold = false },
+          CursorLine = { bg = "none" },
         },
       })
     end,
