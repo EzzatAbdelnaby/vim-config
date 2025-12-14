@@ -23,17 +23,19 @@ return {
         vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", keymap_opts)
       end
 
-      -- Prisma LSP (new v3.0.0 API)
-      vim.lsp.config.prismals = {
-        cmd = { "prisma-language-server", "--stdio" },
-        filetypes = { "prisma" },
-        root_markers = { "package.json", ".git" },
-        capabilities = capabilities,
-        on_attach = on_attach,
-      }
-
-      -- Enable Prisma LSP
-      vim.lsp.enable({ "prismals" })
+      -- Prisma LSP setup
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "prisma",
+        callback = function()
+          vim.lsp.start({
+            name = "prismals",
+            cmd = { "prisma-language-server", "--stdio" },
+            root_dir = vim.fs.root(0, { "package.json", ".git" }),
+            capabilities = capabilities,
+            on_attach = on_attach,
+          })
+        end,
+      })
     end,
   },
 

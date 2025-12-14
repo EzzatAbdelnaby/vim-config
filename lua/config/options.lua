@@ -80,11 +80,34 @@ opt.iskeyword:append("-")
 opt.hidden = true
 opt.showmode = false
 
+-- Auto-reload files when changed externally
+opt.autoread = true
+
 -- Highlight yanked text
 vim.api.nvim_create_autocmd("TextYankPost", {
   desc = "Highlight when yanking text",
   group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
   callback = function()
     vim.highlight.on_yank({ higroup = "IncSearch", timeout = 200 })
+  end,
+})
+
+-- Auto-reload files when changed externally (by Claude, git, etc.)
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
+  desc = "Check for external file changes",
+  group = vim.api.nvim_create_augroup("auto-reload", { clear = true }),
+  callback = function()
+    if vim.fn.getcmdwintype() == "" then
+      vim.cmd("checktime")
+    end
+  end,
+})
+
+-- Notify when file is reloaded
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  desc = "Notify when file is changed externally",
+  group = vim.api.nvim_create_augroup("auto-reload-notify", { clear = true }),
+  callback = function()
+    vim.notify("File changed on disk. Buffer reloaded.", vim.log.levels.INFO)
   end,
 })
