@@ -26,56 +26,120 @@ return {
     end,
   },
 
-  -- File explorer (NO ANIMATIONS)
+  -- File explorer - Neo-tree
   {
-    "nvim-tree/nvim-tree.lua",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons",
+      "MunifTanjim/nui.nvim",
+    },
     config = function()
       -- Disable netrw
       vim.g.loaded_netrw = 1
       vim.g.loaded_netrwPlugin = 1
 
-      require("nvim-tree").setup({
-        disable_netrw = true,
-        hijack_netrw = true,
-        view = {
+      require("neo-tree").setup({
+        close_if_last_window = true,
+        popup_border_style = "rounded",
+        enable_git_status = true,
+        enable_diagnostics = true,
+        sort_case_insensitive = true,
+        default_component_configs = {
+          indent = {
+            indent_size = 2,
+            padding = 1,
+            with_markers = true,
+            indent_marker = "│",
+            last_indent_marker = "└",
+            with_expanders = true,
+            expander_collapsed = "",
+            expander_expanded = "",
+          },
+          icon = {
+            folder_closed = "",
+            folder_open = "",
+            folder_empty = "",
+          },
+          modified = {
+            symbol = "●",
+          },
+          git_status = {
+            symbols = {
+              added = "✚",
+              modified = "",
+              deleted = "✖",
+              renamed = "󰁕",
+              untracked = "",
+              ignored = "",
+              unstaged = "󰄱",
+              staged = "",
+              conflict = "",
+            },
+          },
+        },
+        window = {
+          position = "left",
           width = 35,
-          side = "left",
-        },
-        renderer = {
-          indent_markers = {
-            enable = true,
+          mappings = {
+            ["<space>"] = "none", -- Disable space (we use it as leader)
+            ["<cr>"] = "open",
+            ["o"] = "open",
+            ["s"] = "open_split",
+            ["v"] = "open_vsplit",
+            ["t"] = "open_tabnew",
+            ["a"] = "add",
+            ["d"] = "delete",
+            ["r"] = "rename",
+            ["c"] = "copy",
+            ["m"] = "move",
+            ["q"] = "close_window",
+            ["R"] = "refresh",
+            ["?"] = "show_help",
+            ["<"] = "prev_source",
+            [">"] = "next_source",
+            ["/"] = "fuzzy_finder",
+            ["f"] = "filter_on_submit",
+            ["<C-x>"] = "clear_filter",
+            ["P"] = { "toggle_preview", config = { use_float = true } },
           },
-          icons = {
-            show = {
-              file = true,
-              folder = true,
-              folder_arrow = true,
-              git = true,
+        },
+        filesystem = {
+          filtered_items = {
+            visible = false,
+            hide_dotfiles = false,
+            hide_gitignored = false,
+            hide_by_name = {
+              ".git",
+              "node_modules",
+              ".cache",
             },
           },
+          follow_current_file = {
+            enabled = true,          -- Auto-reveal current file
+            leave_dirs_open = true,  -- Keep folders open
+          },
+          use_libuv_file_watcher = true, -- Auto-refresh on file changes
         },
-        filters = {
-          dotfiles = false,
-          custom = { "^.git$", "node_modules", ".cache" },
+        buffers = {
+          follow_current_file = {
+            enabled = true,
+          },
+          show_unloaded = true,
         },
-        git = {
-          enable = true,
-          ignore = false,
-        },
-        actions = {
-          open_file = {
-            quit_on_open = false,
-            window_picker = {
-              enable = true,
-            },
+        git_status = {
+          window = {
+            position = "float",
           },
         },
       })
 
       -- Keymaps
-      vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" })
-      vim.keymap.set("n", "<leader>ef", "<cmd>NvimTreeFindFile<CR>", { desc = "Find file in explorer" })
+      vim.keymap.set("n", "<leader>e", "<cmd>Neotree toggle reveal<CR>", { desc = "Explorer (reveal file)" })
+      vim.keymap.set("n", "<leader>E", "<cmd>Neotree toggle<CR>", { desc = "Explorer (toggle)" })
+      vim.keymap.set("n", "<leader>eb", "<cmd>Neotree toggle buffers<CR>", { desc = "Explorer buffers" })
+      vim.keymap.set("n", "<leader>eg", "<cmd>Neotree toggle git_status<CR>", { desc = "Explorer git status" })
     end,
   },
 
@@ -109,7 +173,7 @@ return {
           end,
           offsets = {
             {
-              filetype = "NvimTree",
+              filetype = "neo-tree",
               text = "File Explorer",
               text_align = "center",
               separator = true,
