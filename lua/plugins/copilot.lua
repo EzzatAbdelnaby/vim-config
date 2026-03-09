@@ -5,6 +5,9 @@ return {
     "github/copilot.vim",
     event = "InsertEnter",
     config = function()
+      -- Use nvm's Node 22 for Copilot
+      vim.g.copilot_node_command = "/Users/ezzatabdelnaby/.nvm/versions/node/v22.22.1/bin/node"
+
       -- Disable default tab mapping
       vim.g.copilot_no_tab_map = true
 
