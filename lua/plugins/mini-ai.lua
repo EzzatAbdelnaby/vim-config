@@ -9,6 +9,7 @@ return {
     local ai = require("mini.ai")
     return {
       n_lines = 500,
+      disabled_filetypes = { "99prompt" },
       custom_textobjects = {
         -- Code block
         o = ai.gen_spec.treesitter({
