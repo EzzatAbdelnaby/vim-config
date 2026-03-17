@@ -1,6 +1,6 @@
 return {
   {
-    dir = "/Users/mac/Work/99",
+    dir = "/Users/ezzatabdelnaby/work/99",
     config = function()
       local _99 = require("99")
       local cwd = vim.uv.cwd()
@@ -17,7 +17,9 @@ return {
         tmp_dir = "./tmp",
         completion = {
           source = "cmp",
-          custom_rules = {},
+          custom_rules = {
+            "/Users/ezzatabdelnaby/work/skills/",
+          },
         },
         md_files = {
           "AGENT.md",
