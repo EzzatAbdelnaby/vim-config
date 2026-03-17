@@ -1,7 +1,7 @@
 -- Colorscheme configuration
 -- Each colorscheme uses its native colors without modifications
 return {
-  -- Lake Dweller (default) - dark and atmospheric
+  -- Lake Dweller - dark and atmospheric
   {
     "yonatan-perel/lake-dweller.nvim",
     name = "lake-dweller",
@@ -11,7 +11,7 @@ return {
     end,
   },
 
-  -- Rose Pine - soft and elegant
+  -- Rose Pine (default) - soft and elegant
   {
     "rose-pine/neovim",
     name = "rose-pine",
