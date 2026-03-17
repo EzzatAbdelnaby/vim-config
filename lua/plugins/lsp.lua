@@ -77,6 +77,16 @@ return {
 
         opts.desc = "Restart LSP"
         vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)
+
+        opts.desc = "Toggle inlay hints"
+        vim.keymap.set("n", "<leader>ih", function()
+          vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = bufnr }), { bufnr = bufnr })
+        end, opts)
+
+        -- Disable inlay hints by default
+        if client.supports_method("textDocument/inlayHint") then
+          vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
+        end
       end
 
       -- Capabilities for autocompletion

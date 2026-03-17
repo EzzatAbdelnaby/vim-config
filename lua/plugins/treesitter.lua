@@ -37,6 +37,8 @@ return {
           "python",
           "java",
           "dart",
+          "rust",
+          "toml",
         },
         incremental_selection = {
           enable = true,

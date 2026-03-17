@@ -5,10 +5,9 @@ return {
   {
     "yonatan-perel/lake-dweller.nvim",
     name = "lake-dweller",
-    priority = 1000,
+    lazy = true,
     config = function()
       require("lake-dweller").setup({})
-      vim.cmd("colorscheme lake-dweller")
     end,
   },
 
@@ -16,7 +15,7 @@ return {
   {
     "rose-pine/neovim",
     name = "rose-pine",
-    lazy = true,
+    priority = 1000,
     config = function()
       require("rose-pine").setup({
         variant = "moon",
@@ -32,6 +31,7 @@ return {
           CursorLine = { bg = "none" },
         },
       })
+      vim.cmd("colorscheme rose-pine")
     end,
   },
 
