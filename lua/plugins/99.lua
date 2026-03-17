@@ -66,6 +66,22 @@ return {
         _99.tutorial()
       end, { desc = "99: Tutorial" })
 
+      -- Worker: set work description
+      local Worker = _99.Extensions.Worker
+      vim.keymap.set("n", "<leader>wd", function()
+        Worker.set_work()
+      end, { desc = "99: Set work description" })
+
+      -- Worker: review changes against work description
+      vim.keymap.set("n", "<leader>ww", function()
+        Worker.review()
+      end, { desc = "99: Review changes" })
+
+      -- Worker: search for remaining work
+      vim.keymap.set("n", "<leader>ws", function()
+        Worker.search()
+      end, { desc = "99: Search remaining work" })
+
       -- Telescope model/provider pickers (if telescope is available)
       vim.keymap.set("n", "<leader>9m", function()
         require("99.extensions.telescope").select_model()

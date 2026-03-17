@@ -76,6 +76,11 @@ keymap.set("n", "<leader>cT", function()
   end
 end, { desc = "Toggle transparency" })
 
+-- Open current file in browser
+keymap.set("n", "<leader>ob", function()
+  vim.fn.system("open " .. vim.fn.expand("%:p"))
+end, { desc = "Open file in browser" })
+
 -- Theme switcher with variants
 keymap.set("n", "<leader>ct", function()
   local themes = {

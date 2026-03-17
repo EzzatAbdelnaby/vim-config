@@ -23,9 +23,9 @@ local function setup_ts_lsp()
     vim.keymap.set("n", "K", vim.lsp.buf.hover, keymap_opts)
     vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", keymap_opts)
 
-    -- Enable inlay hints if supported
+    -- Inlay hints off by default, toggle with <leader>ci
     if client.server_capabilities.inlayHintProvider then
-      vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+      vim.lsp.inlay_hint.enable(false, { bufnr = bufnr })
     end
   end
 
