@@ -48,6 +48,37 @@ keymap.set("n", "N", "Nzzzv", { desc = "Previous search result and center" })
 -- Better paste
 keymap.set("v", "p", '"_dP', { desc = "Paste without yanking" })
 
+-- Peek definition — opens function in a split, cursor stays in current file
+keymap.set("n", "gp", function()
+  local current_win = vim.api.nvim_get_current_win()
+  local params = vim.lsp.util.make_position_params()
+  vim.lsp.buf_request(0, "textDocument/definition", params, function(_, result)
+    if not result or vim.tbl_isempty(result) then
+      vim.notify("No definition found", vim.log.levels.INFO)
+      return
+    end
+    local target = result[1] or result
+    local uri = target.uri or target.targetUri
+    local range = target.range or target.targetRange
+    if not uri or not range then return end
+
+    local bufnr = vim.uri_to_bufnr(uri)
+    vim.fn.bufload(bufnr)
+
+    -- Open in vertical split on the right
+    vim.cmd("vsplit")
+    local peek_win = vim.api.nvim_get_current_win()
+    vim.api.nvim_win_set_buf(peek_win, bufnr)
+    local lnum = range.start.line + 1
+    local col = range.start.character
+    pcall(vim.api.nvim_win_set_cursor, peek_win, { lnum, col })
+    vim.cmd("normal! zz")
+
+    -- Focus back to original window
+    vim.api.nvim_set_current_win(current_win)
+  end)
+end, { desc = "Peek definition in split" })
+
 -- Save and quit
 keymap.set("n", "<leader>w", "<cmd>w<CR>", { desc = "Save file" })
 keymap.set("n", "<leader>q", "<cmd>q<CR>", { desc = "Quit" })
@@ -104,6 +135,13 @@ keymap.set("n", "<leader>ct", function()
     "kanagawa-lotus",
     -- Gruvbox
     "gruvbox",
+    -- Nord
+    "nord",
+    -- Koda variants
+    "koda-dark",
+    "koda-light",
+    "koda-moss",
+    "koda-glade",
   }
   vim.ui.select(themes, { prompt = "Select theme:" }, function(choice)
     if choice then

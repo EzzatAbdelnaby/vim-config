@@ -161,7 +161,7 @@ return {
     config = function()
       require("diffview").setup({
         diff_binaries = false,
-        enhanced_diff_hl = false,
+        enhanced_diff_hl = true,
         use_icons = true,
         icons = {
           folder_closed = "",
