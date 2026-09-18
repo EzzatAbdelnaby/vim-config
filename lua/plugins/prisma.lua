@@ -33,6 +33,11 @@ return {
             root_dir = vim.fs.root(0, { "package.json", ".git" }),
             capabilities = capabilities,
             on_attach = on_attach,
+            settings = {
+              prisma = {
+                enableDiagnostics = true,
+              },
+            },
           })
         end,
       })

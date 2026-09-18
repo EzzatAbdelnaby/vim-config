@@ -23,6 +23,18 @@ return {
       vim.keymap.set("i", "<M-\\>", "<Plug>(copilot-suggest)", { desc = "Trigger Copilot suggestion" })
       vim.keymap.set("i", "<C-]>", "<Plug>(copilot-dismiss)", { desc = "Dismiss Copilot suggestion" })
 
+      -- Toggle Copilot on/off
+      vim.keymap.set("n", "<leader>cp", function()
+        local status = vim.fn["copilot#Enabled"]()
+        if status == 1 then
+          vim.cmd("Copilot disable")
+          vim.notify("Copilot OFF", vim.log.levels.INFO)
+        else
+          vim.cmd("Copilot enable")
+          vim.notify("Copilot ON", vim.log.levels.INFO)
+        end
+      end, { desc = "Toggle Copilot" })
+
       -- Filetypes where Copilot is disabled
       vim.g.copilot_filetypes = {
         ["*"] = true,

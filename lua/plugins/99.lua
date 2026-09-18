@@ -1,14 +1,14 @@
 return {
   {
-    dir = "/Users/ezzatabdelnaby/work/99",
+    dir = "/Users/ezzatabdelnaby/Personal/99",
     config = function()
       local _99 = require("99")
       local cwd = vim.uv.cwd()
       local basename = vim.fs.basename(cwd)
 
       _99.setup({
-        -- provider = _99.Providers.ClaudeCodeProvider,
-        model = "anthropic/claude-opus-4-6",
+        provider = _99.Providers.ClaudeCodeProvider,
+        model = "claude-sonnet-4-6",
         logger = {
           level = _99.DEBUG,
           path = "/tmp/" .. basename .. ".99.debug",
@@ -23,6 +23,9 @@ return {
         },
         md_files = {
           "AGENT.md",
+        },
+        code_rules = {
+          "~/work/skills/code-rules.md",
         },
       })
 
@@ -204,6 +207,39 @@ Apply the fix precisely. Do not change anything else. Do not refactor unrelated 
         _99.visual_chat()
       end, { desc = "99: Chat about selection" })
 
+      -- Grill the design before building (gv in the chat to implement)
+      vim.keymap.set("n", "<leader>9g", function()
+        _99.grill()
+      end, { desc = "99: Grill design" })
+
+      -- Grill the design about a visual selection
+      vim.keymap.set("v", "<leader>9g", function()
+        _99.visual_grill()
+      end, { desc = "99: Grill about selection" })
+
+      -- Explain a visual selection — mark a confusing sentence in the :Docs
+      -- reader (or any code) and 99 explains it immediately, no typing needed.
+      local EXPLAIN_SYSTEM = [[
+You are my patient senior engineer. Explain the highlighted selection clearly and concretely so I truly understand it — what it means, why it works this way, and how the pieces connect. If it is code, walk the key lines and the data/control flow; if it is documentation or prose, translate the jargon into plain language and give a tiny concrete example. Use the surrounding project for context when useful. Build intuition, stay concise, do NOT just restate it, and do NOT change any code. End with one line on the key takeaway or a gotcha to remember.
+]]
+      vim.keymap.set("v", "<leader>9e", function()
+        vim.api.nvim_feedkeys(
+          vim.api.nvim_replace_termcodes("<Esc>", true, false, true),
+          "x",
+          false
+        )
+        local Range = require("99.geo").Range
+        local range = Range.from_visual_selection()
+        _99.chat({
+          code = range:to_text(),
+          file = vim.api.nvim_buf_get_name(range.buffer),
+          system = EXPLAIN_SYSTEM,
+          title = "99 Explain",
+          hint = "Explaining your selection… `i` to ask a follow-up, `q` to close.",
+          initial_message = "Explain the highlighted selection above.",
+        })
+      end, { desc = "99: Explain selection" })
+
       -- Tutorial / explain code
       vim.keymap.set("n", "<leader>9t", function()
         _99.tutorial()
@@ -225,7 +261,63 @@ Apply the fix precisely. Do not change anything else. Do not refactor unrelated 
         Worker.search()
       end, { desc = "99: Search remaining work" })
 
-      -- Review branch: compare current branch against main
+      -- Quick bug & quality scan — no task/RFC needed, just checks the code
+      -- Uses sonnet for speed
+      vim.keymap.set("n", "<leader>wb", function()
+        local base = "main"
+        local branch = vim.fn.system("git rev-parse --abbrev-ref HEAD"):gsub("\n", "")
+
+        local original_model = _99.get_model()
+        _99.set_model("claude-sonnet-4-6")
+
+        _99.search({
+          additional_prompt = string.format(
+            [[
+## Quick Bug & Quality Scan: %s vs %s
+
+Run `git diff %s...HEAD` to see all changes on this branch.
+
+You are a senior code reviewer. Ignore the task intent — focus ONLY on the code itself.
+Find every issue in the changed code:
+
+### Bugs
+- Logic errors, off-by-one, wrong conditions, null/undefined access
+- Race conditions, async/await mistakes, unhandled promise rejections
+- Wrong variable used, typos in property names, incorrect comparisons
+
+### Security
+- SQL/NoSQL injection, XSS, command injection
+- Hardcoded secrets, exposed API keys, missing auth checks
+- Unsafe user input handling, missing sanitization
+
+### Performance
+- N+1 queries, unnecessary re-renders, missing memoization
+- Blocking I/O, large loops, missing pagination
+- Inefficient data structures, redundant API calls
+
+### Quality
+- Unused variables/imports, dead code, console.logs left in
+- Missing TypeScript types, `any` types, wrong types
+- Missing error handling, empty catch blocks
+- Duplicated code that should be extracted
+
+For EACH finding, the NOTES field MUST include:
+1. Category: [BUG], [SECURITY], [PERFORMANCE], or [QUALITY]
+2. Clear title
+3. WHY it's a problem
+4. How to FIX it
+
+Report with proper Search Format described in <Rule> and <Output>.
+Only report real issues. Do not report style preferences or nitpicks.
+]],
+            branch, base, base
+          ),
+        })
+
+        _99.set_model(original_model)
+      end, { desc = "99: Quick bug & quality scan" })
+
+      -- Full review with task + RFC context
       -- Opens a buffer to paste task + RFC, then :w to submit
       vim.keymap.set("n", "<leader>wr", function()
         local base = "main"
@@ -376,7 +468,7 @@ Example NOTES format:
             )
             -- Switch to sonnet for faster reviews
             local original_model = _99.get_model()
-            _99.set_model("anthropic/claude-sonnet-4-6")
+            _99.set_model("claude-sonnet-4-6")
             _99.search({ additional_prompt = prompt })
             _99.set_model(original_model)
           end,
